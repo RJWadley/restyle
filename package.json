@@ -72,11 +72,13 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsc",
-    "dev": "pnpm build --watch",
     "build:site": "pnpm -F site build",
+    "dev": "pnpm dlx npm-run-all --parallel dev:*",
+    "dev:local": "pnpm build --watch",
+    "dev:site": "pnpm -F site dev",
     "test": "vitest --typecheck",
     "prepublishOnly": "pnpm test run",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm build"
   },
   "peerDependencies": {
     "react": ">=19.0.0"

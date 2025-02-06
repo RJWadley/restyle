@@ -8,6 +8,14 @@
   <p>The simplest way to add CSS styles to your React components.</p>
   <p>No configuration required.</p>
   <p><a href="https://www.restyle.dev/">Visit Site</a> | <a href="https://codesandbox.io/p/sandbox/restyle-basic-usage-5v45lg?file=%2Fsrc%2FApp.tsx%3A12%2C11">Codesandbox Demo</a></p>
+
+<!-- useful info for developers -->
+
+[![NPM](https://img.shields.io/npm/v/restyle)](https://www.npmjs.com/package/restyle)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/restyle)](https://bundlephobia.com/package/restyle)
+[![License](https://img.shields.io/npm/l/restyle)](https://github.com/souporserious/restyle/blob/main/LICENSE.md)
+[![0 dependencies!](https://0dependencies.dev/0dependencies.svg)](https://0dependencies.dev)
+
 </div>
 
 - [Features](#features)
@@ -61,7 +69,7 @@ Restyle leverages React's new ability to [hoist `style` elements](https://react.
 
 <details>
   <summary>Read more</summary>
-
+<blockquote>
 Here's a high-level overview of how it works:
 
 1. **Styles Parsing**: Restyle takes a styles object of CSS and parses it, generating atomic class names for each unique style property and value pair:
@@ -154,6 +162,7 @@ export default function MyComponent() {
 }
 ```
 
+</blockquote>
 </details>
 
 ## Examples
@@ -477,7 +486,7 @@ export default function Hover() {
   return (
     <div
       css={{
-        ':hover': {
+        '&:hover': {
           opacity: 0.8,
         },
       }}
@@ -526,17 +535,12 @@ Thank you to [WebReflection](https://github.com/WebReflection) for the `restyle`
 
 ## Development
 
-In one terminal, run the following command to build the library and watch for changes:
+Run the following command to
+
+- build the library
+- watch for changes
+- start the development server for the site
 
 ```bash
-npm install
-npm run dev
-```
-
-In another terminal, run the following command to start the development server for the site:
-
-```bash
-cd site
-npm install
-npm run dev
+pnpm dev
 ```
