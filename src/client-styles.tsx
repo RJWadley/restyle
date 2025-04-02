@@ -47,6 +47,8 @@ export function ClientStyles({
     high: `rsh${depthString}`,
   }
 
+  performance.mark('client-style-render')
+
   return (
     <>
       {lowRules.length === 0 ? (
