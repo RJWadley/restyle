@@ -15,7 +15,7 @@ export function GlobalStyles({
   const id = hash(rules)
 
   return (
-    <style href={id} precedence="rsg" nonce={nonce}>
+    <style href={id} nonce={nonce}>
       {rules}
     </style>
   )

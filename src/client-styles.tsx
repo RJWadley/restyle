@@ -55,7 +55,6 @@ export function ClientStyles({
         hasRenderedThisDepth ? null : (
           <style
             href={`${levels.low}i`}
-            precedence={levels.low}
             {...sharedProps}
           />
         )
@@ -63,7 +62,6 @@ export function ClientStyles({
         lowRules.map(([className, rule], index) => (
           <style
             href={className}
-            precedence={levels.low}
             key={index}
             {...sharedProps}
           >
@@ -76,7 +74,6 @@ export function ClientStyles({
         hasRenderedThisDepth ? null : (
           <style
             href={`${levels.med}i`}
-            precedence={levels.med}
             {...sharedProps}
           />
         )
@@ -84,7 +81,6 @@ export function ClientStyles({
         mediumRules.map(([className, rule], index) => (
           <style
             href={className}
-            precedence={levels.med}
             key={index}
             {...sharedProps}
           >
@@ -97,7 +93,6 @@ export function ClientStyles({
         hasRenderedThisDepth ? null : (
           <style
             href={`${levels.high}i`}
-            precedence={levels.high}
             {...sharedProps}
           />
         )
@@ -105,7 +100,6 @@ export function ClientStyles({
         highRules.map(([className, rule], index) => (
           <style
             href={className}
-            precedence={levels.high}
             key={index}
             {...sharedProps}
           >

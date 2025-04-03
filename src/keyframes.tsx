@@ -17,7 +17,7 @@ export function keyframes(steps: KeyframesObject, nonce?: string) {
 
   function KeyframesComponent() {
     return (
-      <style href={keyframesName} precedence="rsk" nonce={nonce}>
+      <style href={keyframesName} nonce={nonce}>
         {keyframesCSS}
       </style>
     )
