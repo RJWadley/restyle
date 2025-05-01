@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { expect } from 'vitest'
 import type { RenderResult } from 'vitest-browser-react'
 
@@ -55,10 +57,10 @@ const expectElementMatches = (
 
 export const expectMatchingStyles = (
   screen: RenderResult,
-  html: (html: typeof String.raw) => string,
+  html: ReactNode,
   css: (css: typeof String.raw) => string
 ) => {
-  const htmlInput = html(String.raw) ?? ''
+  const htmlInput = renderToStaticMarkup(html)
   const cssInput = css(String.raw) ?? ''
 
   // open a new tab

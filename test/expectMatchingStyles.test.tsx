@@ -8,11 +8,7 @@ import { page } from '@vitest/browser/context'
 test('expectMatchingStyles', () => {
   const screen = render(<div>hello world</div>)
 
-  expectMatchingStyles(
-    screen,
-    (html) => html` <div>hello world</div> `,
-    (css) => css``
-  )
+  expectMatchingStyles(screen, <div>hello world</div>, (css) => css``)
 })
 
 const Text = styled('div', ({ color }: { color?: string }) => ({
@@ -25,7 +21,7 @@ test('expectMatchingStyles - styled', () => {
 
   expectMatchingStyles(
     screen,
-    (html) => html` <div>hello world</div> `,
+    <div>hello world</div>,
     (css) => css`
       div {
         color: red;
@@ -40,7 +36,7 @@ test('expectMatchingStyles - rerender', () => {
 
   expectMatchingStyles(
     screen,
-    (html) => html` <div>hello world</div> `,
+    <div>hello world</div>,
     (css) => css`
       div {
         color: red;
@@ -52,7 +48,7 @@ test('expectMatchingStyles - rerender', () => {
 
   expectMatchingStyles(
     screen,
-    (html) => html` <div>hello world</div> `,
+    <div>hello world</div>,
     (css) => css`
       div {
         color: blue;
@@ -74,7 +70,7 @@ test('expectMatchingStyles - viewport sizes', async () => {
 
   expectMatchingStyles(
     screen,
-    (html) => html` <div>hello world</div> `,
+    <div>hello world</div>,
     (css) => css`
       div {
         color: red;
@@ -86,7 +82,7 @@ test('expectMatchingStyles - viewport sizes', async () => {
 
   expectMatchingStyles(
     screen,
-    (html) => html` <div>hello world</div> `,
+    <div>hello world</div>,
     (css) => css`
       div {
         color: blue;
