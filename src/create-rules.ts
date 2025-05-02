@@ -8,6 +8,9 @@ import { resolveNestedSelector, l, m, u, hash } from './utils.js'
 
 /** map every generated className back to its original CSS object */
 const rulesCache: Record<string, CSSObject> = {}
+export const addToRulesCache = (className: string, cssObject: CSSObject) => {
+  rulesCache[className] = cssObject
+}
 
 /** type checking for objects */
 const isNestedObject = (
@@ -154,7 +157,7 @@ export function createRules(
     const precedence = l.has(key) ? 'l' : m.has(key) ? 'm' : 'h'
     const className =
       precedence + hash(key + value + selector + atRules.join(''))
-    rulesCache[className] = originalObject
+    addToRulesCache(className, originalObject)
     let rule = createRule(className, selector, key, value)
     if (atRules.length > 0) {
       const atPrefix = atRules.join('{') + '{'
@@ -163,11 +166,11 @@ export function createRules(
     }
     classNames += className + ' '
     if (precedence === 'l') {
-      lowRules.push([className, rule])
+      lowRules.push([className, rule, originalObject])
     } else if (precedence === 'm') {
-      mediumRules.push([className, rule])
+      mediumRules.push([className, rule, originalObject])
     } else {
-      highRules.push([className, rule])
+      highRules.push([className, rule, originalObject])
     }
   }
 
