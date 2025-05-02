@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { createRules } from './create-rules.js'
+import { createRules, mergeStyles } from './create-rules.js'
 
 describe('createRules', () => {
   it('should convert simple style object into CSS rules', () => {
@@ -131,5 +131,25 @@ describe('createRules', () => {
         ],
       ]
     `)
+  })
+
+  it('merges CSS objects', () => {
+    const result = mergeStyles([
+      {
+        color: 'red',
+        nested: { color: 'green', background: 'orange' },
+        one: 2,
+      },
+      { color: 'blue', nested: { color: 'yellow' } },
+    ])
+
+    expect(result).toEqual({
+      color: 'blue',
+      nested: {
+        color: 'yellow',
+        background: 'orange',
+      },
+      one: 2,
+    })
   })
 })
