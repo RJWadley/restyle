@@ -1,9 +1,9 @@
 import { createStyles } from './create-styles.js'
+import { ManagedStyle } from './managed-style/index.js'
 import type { CSSObject } from './types.js'
 import { hash } from './utils.js'
 
-/** Generates styles from an object of styles. */
-export function GlobalStyles({
+function GlobalStyle({
   children,
   nonce,
 }: {
@@ -14,8 +14,25 @@ export function GlobalStyles({
   const id = hash(rules)
 
   return (
-    <style href={id} precedence="rsg" nonce={nonce}>
+    <ManagedStyle href={id} precedence="rsg" nonce={nonce}>
       {rules}
-    </style>
+    </ManagedStyle>
   )
+}
+
+/** Generates styles from an object of styles. */
+export function GlobalStyles({
+  children,
+  nonce,
+}: {
+  children: Record<string, CSSObject>
+  nonce?: string
+}) {
+  return Object.entries(children).map(([key, value]) => (
+    <GlobalStyle key={key} nonce={nonce}>
+      {{
+        [key]: value,
+      }}
+    </GlobalStyle>
+  ))
 }
