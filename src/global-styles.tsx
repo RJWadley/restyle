@@ -3,7 +3,8 @@ import { ManagedStyle } from './managed-style/index.js'
 import type { CSSObject } from './types.js'
 import { hash } from './utils.js'
 
-function GlobalStyle({
+/** Generates styles from an object of styles. */
+export function GlobalStyles({
   children,
   nonce,
 }: {
@@ -18,21 +19,4 @@ function GlobalStyle({
       {rules}
     </ManagedStyle>
   )
-}
-
-/** Generates styles from an object of styles. */
-export function GlobalStyles({
-  children,
-  nonce,
-}: {
-  children: Record<string, CSSObject>
-  nonce?: string
-}) {
-  return Object.entries(children).map(([key, value]) => (
-    <GlobalStyle key={key} nonce={nonce}>
-      {{
-        [key]: value,
-      }}
-    </GlobalStyle>
-  ))
 }
