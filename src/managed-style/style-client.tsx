@@ -25,9 +25,9 @@ export function StyleClient({
     })
 
     return () => {
-      manager.removeStyle(href)
+      manager.unrenderStyle(href)
     }
-  }, [children])
+  }, [children, href, nonce, precedence])
 
   return null
 }

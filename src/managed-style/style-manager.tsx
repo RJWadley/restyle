@@ -1,99 +1,118 @@
-class StyleSheet {
-  hrefs: string[]
-  element: HTMLStyleElement
-  precedence: string
+export const marker = '/*⁂*/'
+
+class PrecedenceSheet {
+  private maxLength = 4000
+  private rulesByHref: Record<string, string | undefined> = {}
+  private element: HTMLStyleElement
+  public precedence: string
+  public isFull = false
 
   constructor({
+    nonce,
     precedence,
-    styleElement,
+    adoptSheet,
   }: {
     precedence: string
-    styleElement: HTMLStyleElement
+    adoptSheet?: HTMLStyleElement
+    nonce: string | undefined
   }) {
-    this.hrefs = styleElement.dataset.href?.split(' ') ?? []
-    this.element = styleElement
+    this.element = adoptSheet ?? document.createElement('style')
     this.precedence = precedence
 
-    // validate that each rule corresponds to one of the hrefs
-    if (this.hrefs.length !== this.element.sheet?.cssRules.length) {
-      throw new Error(
-        'StyleSheet: the number of rules in the style element does not match the number of hrefs. each href must correspond to exactly one rule.'
-      )
-    }
+    // create a sheet in the head for this precedence level
+    if (adoptSheet) {
+      const href = adoptSheet.dataset.href as string
+      const hrefs = href.split(' ')
+      const contents = adoptSheet.textContent?.split(marker) ?? []
 
-    // @ts-expect-error
-    window.randomSheet = this
-  }
-
-  removeStyle(href: string) {
-    const index = this.hrefs.indexOf(href)
-
-    if (index !== -1) {
-      this.element.sheet?.deleteRule(index)
-      this.hrefs.splice(index, 1)
-    }
-  }
-
-  upsertStyle(href: string, textContent: string) {
-    const index = this.hrefs.indexOf(href)
-
-    if (index === -1) {
-      this.element.sheet?.insertRule(
-        textContent,
-        // we want to insert the rule at the end of the sheet
-        this.element.sheet?.cssRules.length ?? 0
-      )
-      this.hrefs.push(href)
+      for (let i = 0; i < hrefs.length; i++) {
+        this.rulesByHref[hrefs[i] ?? ''] = contents[i]
+      }
     } else {
-      this.element.sheet?.deleteRule(index)
-      this.element.sheet?.insertRule(textContent, index)
+      this.element.nonce = nonce
+      this.element.dataset.precedence = precedence
     }
-
-    this.element.dataset.href = this.hrefs.join(' ')
   }
 
-  renderStyle(href: string, textContent: string | null) {
-    if (textContent?.trim()) this.upsertStyle(href, textContent)
-    else this.removeStyle(href)
+  private insertSelf() {
+    // short circuit if we already are in the head
+    if (document.head.contains(this.element)) return
+
+    const precedenceSheets = document.head.querySelectorAll(
+      `style[data-precedence="${this.precedence}"][data-href]`
+    )
+    const allSheets = document.head.querySelectorAll<HTMLStyleElement>(
+      'style[data-precedence][data-href]'
+    )
+    const precedenceSheet = precedenceSheets[precedenceSheets.length - 1]
+    const allSheet = allSheets[allSheets.length - 1]
+    if (precedenceSheet) {
+      precedenceSheet.after(this.element)
+    } else if (allSheet) {
+      allSheet.after(this.element)
+    } else {
+      document.head.appendChild(this.element)
+    }
+  }
+
+  private removeSelf() {
+    this.element.remove()
+  }
+
+  public hasHref(href: string) {
+    return !!this.rulesByHref[href]
+  }
+
+  public renderStyle(href: string, textContent: string | null) {
+    this.rulesByHref[href] = textContent ?? ''
+    this.flushSelf()
+  }
+
+  public unrenderStyle(href: string) {
+    if (this.rulesByHref[href]) {
+      this.rulesByHref[href] = undefined
+      this.flushSelf()
+    }
+  }
+
+  flushQueued = false
+  private flushSelf() {
+    if (this.flushQueued) return
+    this.flushQueued = true
+    queueMicrotask(() => {
+      this.flushQueued = false
+      this.element.textContent = Object.values(this.rulesByHref)
+        .filter(Boolean)
+        .join(marker)
+      if (this.element.textContent.length) this.insertSelf()
+      else this.removeSelf()
+      this.isFull = this.element.textContent
+        ? this.element.textContent.length > this.maxLength
+        : false
+    })
   }
 }
 
 class StyleManager {
-  levelsInOrder: StyleSheet[] = []
-  levelsByPrecedence: Record<string, StyleSheet[]> = {}
+  private usageCountsByHref: Record<string, number> = {}
+  private precedences: PrecedenceSheet[] = []
 
-  constructor() {
-    this.hydrateSelf()
-  }
-
-  hydrateSelf() {
-    const styles = document.head.querySelectorAll<HTMLStyleElement>(
-      'style[data-precedence]'
+  constructor(nonce?: string) {
+    const existingSheets = document.head.querySelectorAll<HTMLStyleElement>(
+      'style[data-precedence][data-href]'
     )
-    this.levelsInOrder = Array.from(styles).map(
+
+    this.precedences = Array.from(existingSheets).map(
       (style) =>
-        new StyleSheet({
-          precedence: style.dataset.precedence ?? 'never',
-          styleElement: style,
+        new PrecedenceSheet({
+          precedence: style.dataset.precedence as string,
+          adoptSheet: style,
+          nonce,
         })
     )
-    this.levelsByPrecedence = this.levelsInOrder.reduce(
-      (acc, level) => {
-        acc[level.precedence] = acc[level.precedence] ?? []
-        acc[level.precedence]?.push(level)
-        return acc
-      },
-      {} as Record<string, StyleSheet[]>
-    )
   }
 
-  removeStyle(href: string) {
-    for (const level of this.levelsInOrder) {
-      level.removeStyle(href)
-    }
-  }
-
-  renderStyle({
+  public renderStyle({
     precedence,
     href,
     textContent,
@@ -104,45 +123,38 @@ class StyleManager {
     textContent: string | null
     nonce?: string
   }) {
-    const level = this.levelsByPrecedence[precedence]?.at(-1)
-    if (level) {
-      level.renderStyle(href, textContent)
-      return
+    this.usageCountsByHref[href] = (this.usageCountsByHref[href] ?? 0) + 1
+
+    const relevantTags = this.precedences.filter(
+      (s) => s.precedence === precedence
+    )
+    const existingStyle = relevantTags?.find((s) => s.hasHref(href))
+    const tagWithRoom = relevantTags.find((s) => !s.isFull)
+    if (existingStyle) {
+      existingStyle.renderStyle(href, textContent)
+    } else if (tagWithRoom) {
+      tagWithRoom.renderStyle(href, textContent)
+    } else {
+      const newSheet = new PrecedenceSheet({ precedence, nonce: nonce })
+      newSheet.renderStyle(href, textContent)
+      this.precedences.push(newSheet)
     }
+  }
 
-    this.hydrateSelf()
+  public unrenderStyle(href: string) {
+    this.usageCountsByHref[href] = (this.usageCountsByHref[href] ?? 1) - 1
 
-    const hydratedLevel = this.levelsByPrecedence[precedence]?.at(-1)
-    if (hydratedLevel) {
-      hydratedLevel.renderStyle(href, textContent)
-      return
+    if (this.usageCountsByHref[href] === 0) {
+      for (const s of this.precedences) {
+        s.unrenderStyle(href)
+      }
     }
-
-    const newElement = document.createElement('style')
-    newElement.dataset.precedence = precedence
-    newElement.dataset.href = href
-    newElement.textContent = textContent
-    newElement.nonce = nonce
-    document.head.appendChild(newElement)
-
-    const newSheet = new StyleSheet({
-      precedence,
-      styleElement: newElement,
-    })
-    this.levelsByPrecedence[precedence] = [newSheet]
-    this.levelsInOrder.push(newSheet)
   }
 }
 
-let styleManager: StyleManager | undefined
+let styleManager: StyleManager
 
 export const getStyleManager = () => {
-  if (!styleManager) {
-    styleManager = new StyleManager()
-  }
-
-  // @ts-expect-error
-  window.styleManager = styleManager
-
+  if (!styleManager) styleManager = new StyleManager()
   return styleManager
 }
