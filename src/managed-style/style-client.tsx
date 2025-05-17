@@ -14,20 +14,20 @@ export function StyleClient({
   children?: string
   nonce?: string
 }) {
+  const manager = getStyleManager()
+  manager.renderStyle({
+    href,
+    precedence,
+    textContent: children ?? null,
+    nonce,
+  })
+
   useInsertionEffect(() => {
-    const manager = getStyleManager()
-
-    manager.renderStyle({
-      href,
-      precedence,
-      textContent: children ?? null,
-      nonce,
-    })
-
+    manager.flush()
     return () => {
       manager.unrenderStyle(href)
     }
-  }, [children, href, nonce, precedence])
+  }, [href, manager])
 
   return null
 }

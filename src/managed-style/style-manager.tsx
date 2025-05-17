@@ -6,6 +6,7 @@ class PrecedenceSheet {
   private element: HTMLStyleElement
   public precedence: string
   public isFull = false
+  private needsFlush = false
 
   constructor({
     nonce,
@@ -65,31 +66,28 @@ class PrecedenceSheet {
 
   public renderStyle(href: string, textContent: string | null) {
     this.rulesByHref[href] = textContent ?? ''
-    this.flushSelf()
+    this.needsFlush = true
   }
 
   public unrenderStyle(href: string) {
     if (this.rulesByHref[href]) {
       this.rulesByHref[href] = undefined
-      this.flushSelf()
+      this.needsFlush = true
     }
   }
 
-  flushQueued = false
-  private flushSelf() {
-    if (this.flushQueued) return
-    this.flushQueued = true
-    queueMicrotask(() => {
-      this.flushQueued = false
-      this.element.textContent = Object.values(this.rulesByHref)
-        .filter(Boolean)
-        .join(marker)
-      if (this.element.textContent.length) this.insertSelf()
-      else this.removeSelf()
-      this.isFull = this.element.textContent
-        ? this.element.textContent.length > this.maxLength
-        : false
-    })
+  public flush() {
+    if (!this.needsFlush) return
+    this.needsFlush = false
+
+    this.element.textContent = Object.values(this.rulesByHref)
+      .filter(Boolean)
+      .join(marker)
+    if (this.element.textContent.length) this.insertSelf()
+    else this.removeSelf()
+    this.isFull = this.element.textContent
+      ? this.element.textContent.length > this.maxLength
+      : false
   }
 }
 
@@ -148,6 +146,12 @@ class StyleManager {
       for (const s of this.precedences) {
         s.unrenderStyle(href)
       }
+    }
+  }
+
+  public flush() {
+    for (const s of this.precedences) {
+      s.flush()
     }
   }
 }
