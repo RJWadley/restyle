@@ -22,11 +22,12 @@ export function StyleClient({
     nonce,
   })
 
+  // flush our styles on every render
+  useInsertionEffect(() => manager.flush())
+
+  // clean up our styles on unmount
   useInsertionEffect(() => {
-    manager.flush()
-    return () => {
-      manager.unrenderStyle(href)
-    }
+    return () => manager.unrenderStyle(href)
   }, [href, manager])
 
   return null
