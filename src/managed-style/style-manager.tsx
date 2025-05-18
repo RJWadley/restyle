@@ -94,6 +94,7 @@ class PrecedenceSheet {
 class StyleManager {
   private usageCountsByHref: Record<string, number> = {}
   private precedences: PrecedenceSheet[] = []
+  private needsFlush = false
 
   constructor(nonce?: string) {
     const existingSheets = document.head.querySelectorAll<HTMLStyleElement>(
@@ -121,6 +122,7 @@ class StyleManager {
     textContent: string | null
     nonce?: string
   }) {
+    this.needsFlush = true
     this.usageCountsByHref[href] = (this.usageCountsByHref[href] ?? 0) + 1
 
     const relevantTags = this.precedences.filter(
@@ -140,6 +142,7 @@ class StyleManager {
   }
 
   public unrenderStyle(href: string) {
+    this.needsFlush = true
     this.usageCountsByHref[href] = (this.usageCountsByHref[href] ?? 1) - 1
 
     if (this.usageCountsByHref[href] === 0) {
@@ -150,8 +153,11 @@ class StyleManager {
   }
 
   public flush() {
-    for (const s of this.precedences) {
-      s.flush()
+    if (this.needsFlush) {
+      this.needsFlush = false
+      for (const s of this.precedences) {
+        s.flush()
+      }
     }
   }
 }
