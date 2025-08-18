@@ -22,8 +22,11 @@ export function createStyles(
         nestedCss +=
           key + '{' + createStyles(value as CSSObject, selector, []) + '}'
       } else {
-        const nestedSelector = resolveNestedSelector(key, selector)
-        nestedCss += createStyles(value as CSSObject, nestedSelector, atRules)
+        nestedCss += createStyles(
+          value as CSSObject,
+          resolveNestedSelector(key, selector),
+          atRules
+        )
       }
       continue
     }
