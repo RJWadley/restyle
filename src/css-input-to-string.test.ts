@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
 
-import { createStyles } from './create-styles.js'
+import { cssInputToString } from './css-input-to-string.js'
 
 describe('createStyles', () => {
   it('should convert simple style objects into CSS strings', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       '*': { boxSizing: 'border-box' },
       body: { color: 'red' },
     })
@@ -12,7 +12,7 @@ describe('createStyles', () => {
   })
 
   it('should handle nested selectors', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       body: {
         color: 'red',
         '&:hover': {
@@ -20,11 +20,11 @@ describe('createStyles', () => {
         },
       },
     })
-    expect(result).toBe('body{color:red;}body:hover{color:blue;}')
+    expect(result).toBe('body{color:red;&:hover{color:blue;}}')
   })
 
   it('should handle at-rules', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       '@media (max-width: 600px)': {
         body: {
           color: 'green',
@@ -35,7 +35,7 @@ describe('createStyles', () => {
   })
 
   it('should append units to numeric values except for unitless properties', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       body: {
         margin: 0,
         opacity: 0.5,
@@ -45,7 +45,7 @@ describe('createStyles', () => {
   })
 
   it('should handle custom properties (CSS variables)', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       ':root': {
         '--main-color': '#06c',
       },
@@ -59,7 +59,7 @@ describe('createStyles', () => {
   })
 
   it('should ignore undefined values', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       body: {
         color: undefined,
         padding: '10px',
@@ -80,15 +80,15 @@ describe('createStyles', () => {
         },
       },
     } as const
-    const result = createStyles(styles)
+    const result = cssInputToString(styles)
 
     expect(result).toBe(
-      '.container{display:flex;}@media (max-width: 600px){.container{display:block;}}.container .item{flex:1;}'
+      '.container{display:flex;@media (max-width: 600px){display:block;}.item{flex:1;}}'
     )
   })
 
   it('should handle unitless properties correctly', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       body: {
         lineHeight: 1.5,
         flexGrow: 1,
@@ -99,7 +99,7 @@ describe('createStyles', () => {
   })
 
   it('should process multiple at-rules and nested selectors', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       '@media (min-width: 768px)': {
         '.nav': {
           display: 'flex',
@@ -115,12 +115,12 @@ describe('createStyles', () => {
       },
     })
     expect(result).toBe(
-      '@media (min-width: 768px){.nav{display:flex;}.nav .nav-item{margin-left:20px;}}@supports (display: grid){.grid{display:grid;}}'
+      '@media (min-width: 768px){.nav{display:flex;.nav-item{margin-left:20px;}}}@supports (display: grid){.grid{display:grid;}}'
     )
   })
 
   it('should handle pseudo-classes and pseudo-elements', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       a: {
         textDecoration: 'none',
         ':hover': {
@@ -133,12 +133,12 @@ describe('createStyles', () => {
       },
     })
     expect(result).toBe(
-      'a{text-decoration:none;}a:hover{text-decoration:underline;}a::after{content:"";display:block;}'
+      'a{text-decoration:none;:hover{text-decoration:underline;}::after{content:"";display:block;}}'
     )
   })
 
   it('should correctly handle global styles without any selectors', () => {
-    const result = createStyles({
+    const result = cssInputToString({
       html: {
         fontSize: '16px',
       },

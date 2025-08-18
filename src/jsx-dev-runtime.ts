@@ -18,15 +18,11 @@ export function jsxDEV(
     const [parsedProps, Styles] = createRestyleProps(type, props)
 
     if (Styles) {
-      if (parsedProps.key === undefined) {
-        parsedProps.key = 'rse'
-      }
-
       return ReactJSXRuntimeDev.jsxDEV(
         Fragment,
         {
           children: [
-            React.createElement(type, parsedProps),
+            React.createElement(type, { ...parsedProps, key: 'rse' }),
             React.createElement(Styles, { key: 'rss' }),
           ],
         },

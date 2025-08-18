@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { CustomProperties } from './types.js'
 import { hash } from './utils.js'
-import { createStyles } from './create-styles.js'
+import { cssInputToString } from './css-input-to-string.js'
 
 export type KeyframeSteps = 'from' | 'to' | `${number}%`
 
@@ -11,8 +11,8 @@ export type KeyframesObject = {
 }
 
 /** Generates styles from an object of keyframes and injects them globally. */
-export function keyframes(steps: KeyframesObject, nonce?: string) {
-  const keyframesString = createStyles(steps)
+export function keyframes(steps: KeyframesObject | string, nonce?: string) {
+  const keyframesString = cssInputToString(steps)
   const keyframesName = `k${hash(keyframesString)}`
   const keyframesCSS = `@keyframes ${keyframesName} { ${keyframesString} }`
 

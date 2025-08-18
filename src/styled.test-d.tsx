@@ -494,3 +494,18 @@ test('unions are not broken', () => {
     </>
   )
 })
+
+test('string styles are allowed', () => {
+  const StringTest = styled('div', 'color: red;')
+  const CSSTest = (props: { className?: string }) => (
+    <div className={props.className} />
+  )
+  const CSSExtended = styled(CSSTest, {})
+
+  const test = (
+    <>
+      <StringTest />
+      <CSSExtended css="color: red;" />
+    </>
+  )
+})

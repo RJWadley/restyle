@@ -1,4 +1,4 @@
-import { createStyles } from './create-styles.js'
+import { cssInputToString } from './css-input-to-string.js'
 import type { CSSObject } from './types.js'
 import { hash } from './utils.js'
 
@@ -7,10 +7,10 @@ export function GlobalStyles({
   children,
   nonce,
 }: {
-  children: CSSObject
+  children: CSSObject | string
   nonce?: string
 }) {
-  const rules = createStyles(children)
+  const rules = cssInputToString(children)
   const id = hash(rules)
 
   return (

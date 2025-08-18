@@ -1,6 +1,7 @@
 import * as React from 'react'
 
-import { css } from './css.js'
+import { createCss } from './create-css.js'
+import { cssInputToString } from './css-input-to-string.js'
 import type {
   AcceptsClassName,
   CSSObject,
@@ -23,7 +24,7 @@ export function styled<
   StyleProps extends object,
 >(
   Component: FunctionComponent<Props>,
-  styles?: CSSObject | StyleResolver<StyleProps, Props>
+  styles?: CSSObject | string | StyleResolver<StyleProps, Props>
 ): StyledComponent<DistributiveOmit<Props, keyof StyleProps> & StyleProps>
 
 export function styled<
@@ -33,7 +34,10 @@ export function styled<
   Component:
     | AcceptsClassName<TagName>
     | React.ComponentClass<{ className?: string }>,
-  styles?: CSSObject | StyleResolver<StyleProps, React.ComponentProps<TagName>>
+  styles?:
+    | CSSObject
+    | string
+    | StyleResolver<StyleProps, React.ComponentProps<TagName>>
 ): StyledComponent<
   DistributiveOmit<React.ComponentProps<TagName>, keyof StyleProps> & StyleProps
 >
@@ -43,7 +47,7 @@ export function styled(
     | AcceptsClassName<any>
     | React.ComponentClass<{ className?: string }>
     | FunctionComponent<any>,
-  styles?: CSSObject | ((styleProps: any, props: any) => CSSObject)
+  styles?: CSSObject | string | ((styleProps: any, props: any) => CSSObject)
 ): StyledComponent<any> {
   return ({
     className: classNameProp,
@@ -51,9 +55,9 @@ export function styled(
     ...props
   }: {
     className?: string
-    css?: CSSObject
+    css?: CSSObject | string
   }) => {
-    let parsedStyles: CSSObject
+    let parsedStyles: CSSObject | string
 
     if (typeof styles === 'function') {
       const styleProps = new Set<string>()
@@ -76,10 +80,13 @@ export function styled(
       parsedStyles = styles || {}
     }
 
-    const [classNames, Styles] = css({
-      ...parsedStyles,
-      ...cssProp,
-    })
+    const base = cssInputToString(parsedStyles)
+    const override = cssInputToString(cssProp)
+
+    const [classNames, Styles] = createCss(
+      [base, override].filter(Boolean).join(';')
+    )
+
     const className = classNameProp
       ? classNameProp + ' ' + classNames
       : classNames

@@ -10,15 +10,6 @@ export type CSSObject = React.CSSProperties & {
 
 export type CSSValue = CSSObject[keyof CSSObject]
 
-export type CSSRule = [className: string, rule?: string]
-
-export type CSSRulePrecedences = [
-  CSSRule[],
-  CSSRule[],
-  CSSRule[],
-  CSSRulePrecedences[],
-]
-
 export type FunctionComponent<Props> = (
   props: Props
 ) => React.ReactNode | Promise<React.ReactNode>
@@ -30,7 +21,7 @@ export type StyleResolver<StyleProps extends object, Props extends object> = (
 
 export type StyledComponent<Props> = (
   props: Props & {
-    css?: CSSObject
+    css?: CSSObject | string
     className?: string
   }
 ) => React.JSX.Element
@@ -65,7 +56,7 @@ export declare namespace RestyleJSX {
     React.JSX.IntrinsicClassAttributes<Type>
   export type IntrinsicElements = {
     [Key in keyof React.JSX.IntrinsicElements]: React.JSX.IntrinsicElements[Key] & {
-      css?: CSSObject
+      css?: CSSObject | string
     }
   }
 }
