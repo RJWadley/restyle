@@ -10,11 +10,21 @@ import { hash } from './utils.js'
  */
 export function createCss(
   styles: CSSObject | string,
-  nonce?: string
+  nonce?: string,
+  options?: {
+    selectorMode?: 'normal' | 'where'
+    classPrefix?: string
+  }
 ): [string, () => React.JSX.Element] {
   const style = cssInputToString(styles)
-  const className = 'c' + hash(style)
-  const rules = `.${className}{${style}}`
+  const selectorMode = options?.selectorMode ?? 'normal'
+  const classPrefix = options?.classPrefix ?? 'c'
+
+  // include selectorMode in the hash to avoid React 19 style dedupe collisions
+  const className = `${classPrefix}${hash(selectorMode + '|' + style)}`
+  const rootSelector =
+    selectorMode === 'where' ? `:where(.${className})` : `.${className}`
+  const rules = `${rootSelector}{${style}}`
 
   function Style() {
     return (

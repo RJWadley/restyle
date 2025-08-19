@@ -11,13 +11,22 @@ export function createRestyleProps(
     return [props, null]
   }
 
-  const [classNames, Styles] = createCss(props.css)
+  // ensure css-prop classes do not look like styled classes
+  // so that styled's classification based on className remains accurate
+  // use a distinct prefix for css-prop generated classes
+  // (keeping the default 'c' would be fine but we want to future-proof)
+  // NOTE: This relies on createCss salting the hash with mode and using provided prefix
+  // We call it again with the desired prefix to get the same styles with rc* class
+  // while avoiding duplication we only want one style element; so compute once with options
+  const [rcClassNames, RcStyles] = createCss(props.css, undefined, {
+    classPrefix: 'rc',
+  })
 
   delete props.css
 
   props.className = props.className
-    ? `${props.className} ${classNames}`
-    : classNames
+    ? `${props.className} ${rcClassNames}`
+    : rcClassNames
 
-  return [props, Styles]
+  return [props, RcStyles]
 }

@@ -12,6 +12,18 @@ import type {
 } from './types.js'
 import type { JSX } from './jsx-runtime.js'
 
+function hasRestyleStyledClass(className: string | undefined): boolean {
+  if (!className) return false
+  const tokens = className.split(/\s+/)
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]
+    if (token && token.startsWith('rs') && /^(rs)[a-z0-9]+$/.test(token)) {
+      return true
+    }
+  }
+  return false
+}
+
 /**
  * Creates a JSX component that forwards a `className` prop with the generated
  * atomic class names to the provided `Component`. Additionally, a `css` prop can
@@ -83,8 +95,14 @@ export function styled(
     const base = cssInputToString(parsedStyles)
     const override = cssInputToString(cssProp)
 
+    const isInner = hasRestyleStyledClass(classNameProp)
     const [classNames, Styles] = createCss(
-      [base, override].filter(Boolean).join(';')
+      [base, override].filter(Boolean).join(';'),
+      undefined,
+      {
+        selectorMode: isInner ? 'where' : 'normal',
+        classPrefix: 'rs',
+      }
     )
 
     const className = classNameProp
