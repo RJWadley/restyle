@@ -52,6 +52,7 @@ export function ClientStyles({
       {lowRules.length === 0 ? (
         hasRenderedThisDepth ? null : (
           <style
+            suppressHydrationWarning
             href={`${levels.low}i`}
             precedence={levels.low}
             {...sharedProps}
@@ -60,6 +61,7 @@ export function ClientStyles({
       ) : (
         lowRules.map(([className, rule], index) => (
           <style
+            suppressHydrationWarning
             key={className}
             href={className}
             precedence={levels.low}
@@ -73,6 +75,7 @@ export function ClientStyles({
       {mediumRules.length === 0 ? (
         hasRenderedThisDepth ? null : (
           <style
+            suppressHydrationWarning
             href={`${levels.med}i`}
             precedence={levels.med}
             {...sharedProps}
@@ -81,6 +84,7 @@ export function ClientStyles({
       ) : (
         mediumRules.map(([className, rule], index) => (
           <style
+            suppressHydrationWarning
             key={className}
             href={className}
             precedence={levels.med}
@@ -94,6 +98,7 @@ export function ClientStyles({
       {highRules.length === 0 ? (
         hasRenderedThisDepth ? null : (
           <style
+            suppressHydrationWarning
             href={`${levels.high}i`}
             precedence={levels.high}
             {...sharedProps}
@@ -102,6 +107,7 @@ export function ClientStyles({
       ) : (
         highRules.map(([className, rule], index) => (
           <style
+            suppressHydrationWarning
             key={className}
             href={className}
             precedence={levels.high}
